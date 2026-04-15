@@ -1,0 +1,32 @@
+# record last command exit status for use in PS1
+# capture last exit status FIRST
+__prompt_command() {
+    local last_exit=$?
+
+    if (( last_exit < 10 )); then
+        codefmt="[ ${last_exit} ]"
+    elif (( last_exit < 100 )); then
+        codefmt="[ ${last_exit}]"
+    else
+        codefmt="[${last_exit}]"
+    fi
+
+    if (( last_exit == 0 )); then
+        codecol='\[\e[1;32m\]'
+    else
+        codecol='\[\e[1;31m\]'
+    fi
+
+    blue='\[\e[1;34m\]'
+    reset='\[\e[0m\]'
+
+    folder="${PWD##*/}"
+
+    suffix='$'
+    (( EUID == 0 )) && suffix='#'
+
+    PS1="${codecol}${codefmt}${reset} ${blue}${folder}${reset}/-${suffix} "
+}
+
+# prepend handler so $? remains the retun value
+PROMPT_COMMAND="__prompt_command${PROMPT_COMMAND:+;}${PROMPT_COMMAND}"
